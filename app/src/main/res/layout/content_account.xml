@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:weightSum="1"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        tools:context="com.example.kimas.spotspacer.AccountActivity"
+        tools:showIn="@layout/activity_account">
+
+        <include
+            android:id="@+id/include_header"
+            layout="@layout/nav_header_main"
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:layout_marginTop="?android:attr/actionBarSize" />
+
+        <FrameLayout
+            android:id="@+id/textPoint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginTop="-55dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/status"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start|center_vertical"
+                android:gravity="center"
+                android:text="@string/signed_out"
+                android:textColor="@android:color/black"
+                android:textSize="14sp"
+                android:visibility="gone" />
+
+            <GridLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="top|center"
+                android:columnCount="5"
+                android:rowCount="1">
+
+                <ImageView
+                    android:id="@+id/textView"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_column="0"
+                    android:layout_row="0"
+                    android:contentDescription="@string/spotted"
+                    android:text="@string/spotted"
+                    app:srcCompat="@drawable/free_ic"
+                    tools:ignore="MissingPrefix"
+                    tools:src="@drawable/free_ic"/>
+
+                <TextView
+                    android:id="@+id/spottedNum"
+                    android:layout_width="wrap_content"
+                    android:layout_height="24dp"
+                    android:layout_column="1"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginStart="5dp"
+                    android:gravity="center_vertical"
+                    android:text="@string/zero"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp" />
+
+                <View
+                    android:layout_width="1px"
+                    android:layout_height="30dp"
+                    android:layout_marginEnd="10dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_marginStart="10dp"
+                    android:background="@android:color/white" />
+
+                <ImageView
+                    android:id="@+id/textView2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_column="3"
+                    android:contentDescription="@string/thanksText"
+                    app:srcCompat="@drawable/ic_thumb_up_24dp_white"
+                    tools:ignore="MissingPrefix"
+                    tools:src="@drawable/ic_thumb_up_24dp_white"/>
+
+                <TextView
+                    android:id="@+id/thanksNum"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_column="4"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginStart="5dp"
+                    android:text="@string/zero"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp" />
+            </GridLayout>
+
+
+        </FrameLayout>
+
+        <LinearLayout
+            android:id="@+id/sign_in_button"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="55dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="visible"
+            tools:visibility="visible">
+
+
+            <com.google.android.gms.common.SignInButton
+                android:id="@+id/sign_in_google"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginLeft="25dp"
+                android:layout_marginRight="25dp"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+            <TextView
+                android:id="@+id/orT"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginBottom="20dp"
+                android:layout_marginTop="20dp"
+                android:gravity="center"
+                android:text="@string/or_seperrator"
+                android:textColor="@android:color/black"
+                android:textSize="14sp" />
+
+            <com.facebook.login.widget.LoginButton xmlns:facebook="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/login_button_fb"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_gravity="center"
+                android:layout_marginLeft="25dp"
+                android:layout_marginRight="25dp"
+                android:onClick="fbSignInButton"
+                android:visibility="visible"
+                facebook:com_facebook_login_text="@string/logInFbText"
+                facebook:com_facebook_logout_text="@string/sign_out"
+                tools:visibility="visible" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/sign_out_and_disconnect"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="55dp"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:orientation="vertical"
+            android:paddingLeft="16dp"
+
+            android:paddingRight="16dp"
+            android:visibility="gone"
+            tools:visibility="gone">
+
+            <Button
+                android:id="@+id/sign_out_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:elevation="4dp"
+                android:text="@string/sign_out"
+                android:theme="@style/ThemeOverlay.MyLightButton" />
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+</ScrollView>

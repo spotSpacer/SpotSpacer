@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_id": "spotspacer",
+    "project_number": "660390892251",
+    "name": "SpotSpacer"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:660390892251:android:79d5485ad6616486",
+        "client_id": "android:com.example.kimas.spotspacer",
+        "client_type": 1,
+        "android_client_info": {
+          "package_name": "com.example.kimas.spotspacer",
+          "certificate_hash": []
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "660390892251-r89et790eqon8pnvnpa3mggfd3f7265q.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "cloud_messaging_service": {
+          "status": 1,
+          "apns_config": []
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "google_signin_service": {
+          "status": 1
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "client_info": [],
+  "ARTIFACT_VERSION": "1"
+}
