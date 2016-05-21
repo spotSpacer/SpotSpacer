@@ -87,7 +87,7 @@ public class AccountActivity extends AppCompatActivity implements GoogleApiClien
         setSupportActionBar(myToolbar);
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
+        getSupportActionBar().setTitle(R.string.title_activity_account);
 
         db = new BackendlessDB(this);
 

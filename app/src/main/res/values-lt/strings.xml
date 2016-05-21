@@ -68,4 +68,13 @@
     <string name="to">Iki:</string>
     <string name="zeroTime">00:00</string>
     <string name="internetError">Nėra interneto ryšio</string>
+    <string name="searchErr">Nieko nerado</string>
+    <string name="addNon">Pridėti apribotą</string>
+    <string name="addFree">Pridėti nemokamą</string>
+    <string name="filter">Filtras</string>
+    <string name="dislike">Nepatinka</string>
+    <string name="timelimitText">Laiko limitas</string>
+    <string name="selected_place">Paskutinė pažymėta vieta:</string>
+    <string name="like">Patinka</string>
+    <string name="lang">Kalba</string>
 </resources>

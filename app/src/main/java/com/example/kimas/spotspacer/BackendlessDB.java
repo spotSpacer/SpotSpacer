@@ -73,6 +73,7 @@ public class BackendlessDB implements IBackendlessDB {
             }
         });
     }
+
     @Override
     public void getNonParkingLists(double lat, double lon, double radius) {
         List<ParkingSpot> result = new LinkedList<>();
@@ -120,6 +121,7 @@ public class BackendlessDB implements IBackendlessDB {
             }
         });
     }
+
     @Override
     public void getParkingList(double lat, double lon, double radius) {
         List<ParkingSpot> result = new LinkedList<>();
@@ -281,17 +283,15 @@ public class BackendlessDB implements IBackendlessDB {
         whereClause.append(userid);
         BackendlessDataQuery dataQuery = new BackendlessDataQuery();
         dataQuery.setWhereClause(whereClause.toString());
-        Backendless.Data.of(UserData.class).find(dataQuery, new AsyncCallback<BackendlessCollection<UserData>>()
-        {
+        Backendless.Data.of(UserData.class).find(dataQuery, new AsyncCallback<BackendlessCollection<UserData>>() {
             @Override
-            public void handleResponse(BackendlessCollection<UserData>  responce )
-            {
+            public void handleResponse(BackendlessCollection<UserData> responce) {
                 List<UserData> nn = new ArrayList<>(responce.getData());
                 String d = "";
 //                if (nn.get(0) != null)
 //                    d = nn.get(0).getUserName();
                 Log.d("Size", "" + nn.size());
-                if(nn.size() == 0)
+                if (nn.size() == 0)
                     ((AccountActivity) ctx).saveNewestUser();
                 else
                     ((AccountActivity) ctx).updateCurrentUser(nn.get(0));
@@ -299,8 +299,7 @@ public class BackendlessDB implements IBackendlessDB {
             }
 
             @Override
-            public void handleFault( BackendlessFault fault )
-            {
+            public void handleFault(BackendlessFault fault) {
                 System.err.println(String.format("searchByDateInRadius FAULT = %s", fault));
             }
         });
@@ -324,6 +323,7 @@ public class BackendlessDB implements IBackendlessDB {
             });
         }
     }
+
     @Override
     public void getBootUserData(String objID) {
         if (!objID.isEmpty()) {
@@ -342,12 +342,14 @@ public class BackendlessDB implements IBackendlessDB {
             });
         }
     }
+
     @Override
     public void setNewUserData(UserData userFellow) {
         Backendless.Persistence.save(userFellow, new AsyncCallback<UserData>() {
             public void handleResponse(UserData response) {
                 ((AccountActivity) ctx).saveUserInfo(response.getObjectId());
             }
+
             public void handleFault(BackendlessFault fault) {
                 System.err.println(String.format("searchByDateInRadius FAULT = %s", fault));
             }
@@ -369,5 +371,61 @@ public class BackendlessDB implements IBackendlessDB {
                 }
             });
         }
+    }
+
+    @Override
+    public void setNewFavorite(String userId, ParkingSpot parkingSpot) {
+
+    }
+
+    @Override
+    public void removeFavorite(String userId, String spotId) {
+
+    }
+
+    @Override
+    public void getFavorites(String userId) {
+        if (!userId.isEmpty()) {
+            String whereClause = "userId = " + userId;
+            BackendlessDataQuery dataQuery = new BackendlessDataQuery();
+            dataQuery.setWhereClause(whereClause);
+
+            Backendless.Persistence.of(Favorite.class).find(dataQuery, new AsyncCallback<BackendlessCollection<Favorite>>() {
+
+                public void handleResponse(BackendlessCollection<Favorite> response) {
+                    if (response != null) {
+                        ((MainActivity) ctx).saveFavorites(convertFav(response.getData()));
+                    }
+                }
+
+                public void handleFault(BackendlessFault fault) {
+                    System.err.println(String.format("searchByDateInRadius FAULT = %s", fault));
+                }
+            });
+        }
+    }
+
+    private List<Favorite> convertFav(List<Favorite> data) {
+        List<Favorite> result = new LinkedList<Favorite>();
+        for (Favorite point : data) {
+            Favorite favSpot = new Favorite();
+            favSpot.setLatitude(point.getLatitude());
+            favSpot.setLongtitude(point.getLongtitude());
+            favSpot.setObjectId(point.getObjectId());
+            if (point.getCity() != null)
+                favSpot.setCity(point.getCity());
+            if (point.getNational() != null)
+                favSpot.setNational(point.getNational());
+            if (point.getStreet() != null)
+                favSpot.setStreet(point.getStreet());
+            if (point.getPartTime() != null)
+                favSpot.setPartTime(point.getPartTime());
+            favSpot.setStartFrom(point.getStartFrom());
+            favSpot.setEndTo(point.getEndTo());
+            if (point.getWeekLimit() != null)
+                favSpot.setWeekLimit(point.getWeekLimit());
+            result.add(favSpot);
+        }
+        return result;
     }
 }

@@ -11,9 +11,7 @@ import android.os.Bundle;
 
 import java.util.Locale;
 
-/**
- * Created by vamsikrishna on 12-Feb-15.
- */
+
 public class SplashScreen extends Activity {
     SharedPreferences sharedpreferences;
     public static final String SPOTSPACER_PREFERENCES = "spotSpacer_Prefs";
@@ -22,6 +20,7 @@ public class SplashScreen extends Activity {
     public static final String custId = "custId";
     public static final String userTags = "userTags";
     public static final String userThanks = "userThanks";
+    public static final String radius = "radius";
     public IBackendlessDB db;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,16 +50,22 @@ public class SplashScreen extends Activity {
                 }catch(InterruptedException e){
                     e.printStackTrace();
                 }finally{
-                    if (!sharedpreferences.getBoolean(firstStep,false))
+                    if (!sharedpreferences.getBoolean(firstStep,false)) {
+                        SharedPreferences.Editor editor = sharedpreferences.edit();
+                        putDouble(editor, radius, 500.0);
                         startActivity(new Intent(SplashScreen.this, FirstStepsActivity.class));
-                    else
+                    }
+                    else {
                         startActivity(new Intent(SplashScreen.this, MainActivity.class));
+                    }
                 }
             }
         };
         timer.start();
     }
-
+    SharedPreferences.Editor putDouble(final SharedPreferences.Editor edit, final String key, final double value) {
+        return edit.putLong(key, Double.doubleToRawLongBits(value));
+    }
     @Override
     protected void onPause() {
         // TODO Auto-generated method stub

@@ -18,7 +18,7 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="500M"
         android:id="@+id/meterText"
-        android:layout_gravity="left|bottom"
+        android:layout_gravity="center_horizontal|top"
         android:textSize="30sp" />
 
 </FrameLayout>

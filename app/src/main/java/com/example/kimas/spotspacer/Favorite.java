@@ -1,13 +1,15 @@
 package com.example.kimas.spotspacer;
 
-public class ParkingSpot {
+/**
+ * Created by kimas on 5/21/2016.
+ */
+public class Favorite {
     private String objectId;
+    private String userId;
     private String city;
     private String national;
-    private String number;
     private double latitude;
     private double longtitude;
-    private String userId;
     private boolean freeParking;
     private String street;
     private long startFrom;
@@ -24,6 +26,14 @@ public class ParkingSpot {
         this.objectId = objectId;
     }
 
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
     public String getCity() { return city; }
 
     public void setCity(String city) {
@@ -36,14 +46,6 @@ public class ParkingSpot {
 
     public void setNational(String national) {
         this.national = national;
-    }
-
-    public String getNumber() {
-        return number;
-    }
-
-    public void setNumber(String number) {
-        this.number = number;
     }
 
     public double getLatitude() {
@@ -70,13 +72,6 @@ public class ParkingSpot {
         this.partTime = partTime;
     }
 
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
 
     public boolean isFreeParking() {
         return freeParking;
@@ -121,5 +116,4 @@ public class ParkingSpot {
     public void setWeekLimit(String weekLimit){this.weekLimit = weekLimit; }
 
     public String getWeekLimit() {return weekLimit;}
-
 }

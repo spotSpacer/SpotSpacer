@@ -78,8 +78,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
-            android:layout_toEndOf="@+id/markerAddress"
-            android:layout_toRightOf="@+id/markerAddress">
+           >
 
             <ImageView
                 android:id="@+id/markerAddress"
@@ -162,6 +161,22 @@
         </RelativeLayout>
 
         <ImageView
+            tools:ignore="MissingPrefix"
+            tools:src="@drawable/ic_thumb_up_24dp"
+            app:srcCompat="@drawable/ic_thumb_up_24dp"
+            android:id="@+id/imageLike"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_alignParentTop="true"
+            android:layout_gravity="center_vertical|right"
+            android:layout_toLeftOf="@+id/imageDislike"
+            android:clickable="true"
+            android:contentDescription="@string/like"
+            android:foregroundGravity="right"
+            android:textAlignment="gravity"
+            android:visibility="gone"/>
+
+        <ImageView
             android:id="@+id/imageDislike"
             android:layout_width="32dp"
             android:layout_height="32dp"
@@ -177,24 +192,24 @@
             android:textAlignment="gravity"
             app:srcCompat="@drawable/ic_thumb_down_24dp"
             tools:ignore="MissingPrefix"
-            tools:src="@drawable/ic_thumb_down_24dp"/>
+            tools:src="@drawable/ic_thumb_down_24dp"
+            android:visibility="gone"/>
 
         <ImageView
-            android:id="@+id/imageLike"
+            android:id="@+id/imageFav"
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_alignParentTop="true"
             android:layout_gravity="center_vertical|right"
-            android:layout_toLeftOf="@+id/imageDislike"
             android:layout_toStartOf="@+id/imageDislike"
-
             android:clickable="true"
             android:contentDescription="@string/like"
             android:foregroundGravity="right"
             android:textAlignment="gravity"
-            app:srcCompat="@drawable/ic_thumb_up_24dp"
+            app:srcCompat="@drawable/ic_favorite_24dp_no"
             tools:ignore="MissingPrefix"
-            tools:src="@drawable/ic_thumb_up_24dp"/>
+            tools:src="@drawable/ic_favorite_24dp_no"
+            android:layout_alignRight="@+id/timeTable" />
 
     </RelativeLayout>
 

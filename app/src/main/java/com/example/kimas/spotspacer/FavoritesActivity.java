@@ -19,6 +19,7 @@ public class FavoritesActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle(R.string.title_activity_favorites);
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item){

@@ -1,5 +1,7 @@
 package com.example.kimas.spotspacer;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import android.support.design.widget.TabLayout;
@@ -20,6 +22,9 @@ public class Settings0Activity extends AppCompatActivity {
     private Toolbar toolbar;
     private TabLayout tabLayout;
     private ViewPager viewPager;
+    public static final String SPOTSPACER_PREFERENCES = "spotSpacer_Prefs";
+    public static final String language = "language";
+    SharedPreferences sharedpreferences;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,18 +33,25 @@ public class Settings0Activity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle(R.string.title_activity_settings0);
         viewPager = (ViewPager) findViewById(R.id.viewpager);
         setupViewPager(viewPager);
-
+        sharedpreferences = getSharedPreferences(SPOTSPACER_PREFERENCES, Context.MODE_PRIVATE);
         tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
 
     }
 
     private void setupViewPager(ViewPager viewPager) {
+        sharedpreferences = getSharedPreferences(SPOTSPACER_PREFERENCES, Context.MODE_PRIVATE);
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
-        adapter.addFragment(new RadiusFragment(), "Radius");
-        adapter.addFragment(new OptionsFragment(), "Options");
+        if (sharedpreferences.getString(language, "en").equals("lt")) {
+            adapter.addFragment(new RadiusFragment(), "Spindulys");
+            adapter.addFragment(new OptionsFragment(), "Kita");
+        }else{
+            adapter.addFragment(new RadiusFragment(), "Radius");
+            adapter.addFragment(new OptionsFragment(), "Other");
+        }
         viewPager.setAdapter(adapter);
     }
 

@@ -27,4 +27,10 @@ public interface IBackendlessDB {
     void setNewUserData(UserData userFellow);
 
     void updateUserData(UserData userFellow);
+
+    void setNewFavorite(String userId, ParkingSpot parkingSpot);
+
+    void removeFavorite(String userId, String spotId);
+
+    void getFavorites(String userId);
 }

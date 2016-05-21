@@ -85,7 +85,7 @@
     <string name="freeText">It\'s FREE</string>
     <string name="freeFor">"Free for "</string>
     <string name="internetError">No internet conection</string>
-    <string name="zero">0</string>
+    <string name="zero" translatable="false">0</string>
     <string name="filter">Filter</string>
     <string name="addFree">Add FREE spot</string>
     <string name="addNon">Add spot</string>
@@ -94,7 +94,7 @@
     <string name="like">like</string>
 
     <string name="selected_place">Last Selected Place:</string>
-    <string name="place_details">
+    <string name="place_details" translatable="false">
     <![CDATA[
         <b>%1$s</b>
         <br/>
@@ -109,4 +109,11 @@
         LatLng: %5$s
     ]]>
     </string>
+    <string name="searchErr">Didn\'t find anything</string>
+    <string name="lang">Language</string>
+
+
+
+
+
 </resources>

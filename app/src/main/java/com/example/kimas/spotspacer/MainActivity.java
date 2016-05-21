@@ -124,6 +124,7 @@ public class MainActivity extends AppCompatActivity
     public static final String lastLat = "lastLat";
     public static final String custId = "custId";
     public static final String gOrFb = "gOrFb";
+    public static final String filterNonFree = "nonFreeSpot";
     SharedPreferences sharedpreferences;
     private boolean searchActive = false;
     private static String userIdToken;
@@ -136,13 +137,17 @@ public class MainActivity extends AppCompatActivity
     private TextView limTxt;
     private boolean isRegistered;
     private boolean stateChange = false;
-    double radiusInMeters = 500.0;
+    public static final String radius = "radius";
+    public double radiusInMeters;
     private TextView mPlaceDetailsText;
     private static final int REQUEST_CODE_AUTOCOMPLETE = 1;
     private TextView mPlaceAttribution;
     int strokeColor = 0xff33FF66;//outline
     int shadeColor = 0x4433FF66;//opaque fill
+    private boolean searchNow = false;
     private static Context ctx;
+    private Place places;
+    private boolean nonFree = false;
     // Add this inside your class
     BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -185,10 +190,13 @@ public class MainActivity extends AppCompatActivity
         Last_Lat = getDouble(sharedpreferences, lastLat, 0);
         Last_Lon = getDouble(sharedpreferences, lastLon, 0);
         userIdToken = sharedpreferences.getString(userId, "0");
-
+        nonFree = sharedpreferences.getBoolean(filterNonFree, false);
         addPop = (TextView) findViewById(R.id.textaddress); //adreso eilute
         limTxt = (TextView) findViewById(R.id.textLimit); //limituotu dienu eilute
-
+        radiusInMeters = getDouble(sharedpreferences, radius, 500.0);
+        SwitchCompat toogler = (SwitchCompat) findViewById(R.id.switchRealTime);
+        assert toogler != null;
+        toogler.setChecked(nonFree);
         mFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mFragment.getMapAsync(this);
         buildGoogleApiClient();
@@ -216,7 +224,7 @@ public class MainActivity extends AppCompatActivity
 
 
         coordinatorLayout = (CoordinatorLayout) findViewById(R.id.main_content);
-// The View with the BottomSheetBehavior
+        // The View with the BottomSheetBehavior
         View bottomSheet = coordinatorLayout.findViewById(R.id.bottom_sheet);
         behavior = BottomSheetBehavior.from(bottomSheet);
         behavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
@@ -274,9 +282,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    /**
-     * Called after the autocomplete activity has finished to return its result.
-     */
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -288,15 +294,11 @@ public class MainActivity extends AppCompatActivity
                 Place place = PlaceAutocomplete.getPlace(this, data);
                 Log.i(TAG, "Place Selected: " + place.getName());
                 latLng = place.getLatLng();
-                db.getParkingList(place.getLatLng().latitude, place.getLatLng().longitude, 1000);
+                db.getParkingList(place.getLatLng().latitude, place.getLatLng().longitude, radiusInMeters);
                 CameraPosition cameraPosition = new CameraPosition.Builder().target(new LatLng(place.getLatLng().latitude, place.getLatLng().longitude)).zoom(mMap.getCameraPosition().zoom).build();
                 mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-                searchActive = true;
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    mMap.addMarker(new MarkerOptions().position(latLng).title(place.getName().toString()).icon(getBitmapDescriptor(R.drawable.search_pin)));
-                }else {
-                    mMap.addMarker(new MarkerOptions().position(latLng).title(place.getName().toString()).icon(BitmapDescriptorFactory.fromResource(R.drawable.search_pin)));
-                }
+                searchNow = true;
+                places = place;
                 CharSequence attributions = place.getAttributions();
                 if (!TextUtils.isEmpty(attributions)) {
                 } else {
@@ -305,6 +307,7 @@ public class MainActivity extends AppCompatActivity
             } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
                 Status status = PlaceAutocomplete.getStatus(this, data);
                 Log.e(TAG, "Error: Status = " + status.toString());
+                Toast.makeText(this, R.string.searchErr, Toast.LENGTH_LONG).show();
             } else if (resultCode == RESULT_CANCELED) {
 
             }
@@ -327,11 +330,20 @@ public class MainActivity extends AppCompatActivity
     //mygtukai pereiti i kitus activity ir atlikti task'us
     public void toogleButton(View view) {
         SwitchCompat toogler = (SwitchCompat) findViewById(R.id.switchRealTime);
+        SharedPreferences.Editor edis = sharedpreferences.edit();
+        assert toogler != null;
         if (toogler.isChecked()) {
+            edis.putBoolean(filterNonFree, true);
+            nonFree = true;
+            db.getParkingList(Last_Lat, Last_Lon, radiusInMeters);
             toogler.setThumbResource(R.drawable.ic_realtime_24dp);
         } else {
+            edis.putBoolean(filterNonFree, false);
+            nonFree = false;
+            db.getParkingList(Last_Lat, Last_Lon, radiusInMeters);
             toogler.setThumbResource(R.drawable.ic_realtime_24dp_off);
         }
+        edis.apply();
     }
 
     @Override
@@ -350,60 +362,66 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void markerWindow(Marker marker) {
+
         final CharSequence[] items = {getString(R.string.workDays), getString(R.string.weekends), getString(R.string.always)};
         RelativeLayout tt = (RelativeLayout) findViewById(R.id.timeTable);
         TextView cc = (TextView) findViewById(R.id.cityCountry);
         ImageView markerPoint = (ImageView) findViewById(R.id.imageMarker);
         TextView fromNum = (TextView) findViewById(R.id.textView5);
         TextView toNum = (TextView) findViewById(R.id.textView8);
+        if (!marker.getSnippet().equals("ban")) {
 
-        Gson gson = new GsonBuilder().create();
-        ParkingSpot m = gson.fromJson(marker.getSnippet(), ParkingSpot.class);
-        addPop.setText(marker.getTitle());
-        cc.setText(m.getCity() + ", " + m.getNational());
-        String s = "  ";
-        if (m.getPartTime() != null && !m.getPartTime().isEmpty()) {
-            s = getString(R.string.freeFor) + m.getPartTime() + "h";
-            switch (m.getPartTime()) {
-                case "1":
-                    markerPoint.setImageResource(R.drawable.pin_free_1h);
+            Gson gson = new GsonBuilder().create();
+            ParkingSpot m = gson.fromJson(marker.getSnippet(), ParkingSpot.class);
+            addPop.setText(marker.getTitle());
+
+
+            assert cc != null;
+            cc.setText(m.getCity() + ", " + m.getNational());
+            String s = "  ";
+            if (m.getPartTime() != null && !m.getPartTime().isEmpty()) {
+                s = getString(R.string.freeFor) + m.getPartTime() + "h";
+                switch (m.getPartTime()) {
+                    case "1":
+                        markerPoint.setImageResource(R.drawable.pin_free_1h);
 //                    Picasso.with(this).load(R.drawable.pin_free_1h).into(markerPoint);
-                    break;
-                case "2":
-                    markerPoint.setImageResource(R.drawable.pin_free_2h);
+                        break;
+                    case "2":
+                        markerPoint.setImageResource(R.drawable.pin_free_2h);
 //                    Picasso.with(this).load(R.drawable.pin_free_2h).into(markerPoint);
-                    break;
+                        break;
+                }
             }
-        }
-        if (m.getWeekLimit() != null && !m.getWeekLimit().isEmpty()) {
-            switch (m.getWeekLimit()) {
-                case "work days":
-                    limTxt.setText(items[0] + " " + s);
-                    break;
-                case "weekends":
-                    limTxt.setText(items[1] + " " + s);
-                    break;
-                case "both":
-                    limTxt.setText(items[2] + " " + s);
-                    break;
-            }
-        } else {
-            limTxt.setText(R.string.freeText);
-            markerPoint.setImageResource(R.drawable.pin_free);
+            if (m.getWeekLimit() != null && !m.getWeekLimit().isEmpty()) {
+                switch (m.getWeekLimit()) {
+                    case "work days":
+                        limTxt.setText(items[0] + " " + s);
+                        break;
+                    case "weekends":
+                        limTxt.setText(items[1] + " " + s);
+                        break;
+                    case "both":
+                        limTxt.setText(items[2] + " " + s);
+                        break;
+                }
+            } else {
+                limTxt.setText(R.string.freeText);
+                markerPoint.setImageResource(R.drawable.pin_free);
 //            Picasso.with(this).load(R.drawable.pin_free).into(markerPoint);
+            }
+            if (m.getStartFrom() != 0 && m.getEndTo() != 0) {
+                fromNum.setText(printTime(m.getStartFrom(), DateFormat.is24HourFormat(this)));
+                toNum.setText(printTime(m.getEndTo(), DateFormat.is24HourFormat(this)));
+                tt.setVisibility(View.VISIBLE);
+                markerPoint.setImageResource(R.drawable.pin_paid_time);
+                // Picasso.with(this).load(R.drawable.pin_paid_time).into(markerPoint);
+            } else
+                tt.setVisibility(View.GONE);
         }
-        if (m.getStartFrom() != 0 && m.getEndTo() != 0) {
-            fromNum.setText(printTime(m.getStartFrom(), DateFormat.is24HourFormat(this)));
-            toNum.setText(printTime(m.getEndTo(), DateFormat.is24HourFormat(this)));
-            tt.setVisibility(View.VISIBLE);
-            markerPoint.setImageResource(R.drawable.pin_paid_time);
-            // Picasso.with(this).load(R.drawable.pin_paid_time).into(markerPoint);
-        } else
-            tt.setVisibility(View.GONE);
-
         CameraPosition cameraPosition = new CameraPosition.Builder().target(marker.getPosition()).zoom(mMap.getCameraPosition().zoom).build();
         mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-        if (behavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
+
+        if (behavior.getState() == BottomSheetBehavior.STATE_COLLAPSED && !marker.getSnippet().equals("ban")) {
             behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
         }
     }
@@ -482,13 +500,14 @@ public class MainActivity extends AppCompatActivity
             if (myLocation != null) {
                 double dLatitude = myLocation.getLatitude();
                 double dLongitude = myLocation.getLongitude();
-                db.getParkingList(Last_Lat, Last_Lon, 1000);
+                db.getParkingList(Last_Lat, Last_Lon, radiusInMeters);
                 CameraPosition cameraPosition = new CameraPosition.Builder().target(new LatLng(dLatitude, dLongitude)).zoom(mMap.getCameraPosition().zoom).build();
                 mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
                 searchActive = false;
             } else
                 Toast.makeText(MainActivity.this, R.string.unableLocation, Toast.LENGTH_SHORT).show();
         }
+        searchNow = false;
     }
     ///========================================================================================
     //write to DB when user adds new spot
@@ -526,11 +545,12 @@ public class MainActivity extends AppCompatActivity
 
             parkingSpot.setWeekLimit(daysLen);
             parkingSpot.setUserId(sharedpreferences.getString(custId, ""));
+            radiusInMeters = getDouble(sharedpreferences, radius, 500.0);
             db.saveParkingSpot(parkingSpot);
             Toast.makeText(MainActivity.this, R.string.spottedText, Toast.LENGTH_SHORT).show();
             mMap.clear();
             updateSpotsThanks(sharedpreferences.getInt(userTags, 0), sharedpreferences.getInt(userThanks, 0), true);
-            db.getParkingList(Last_Lat, Last_Lon, 1000);
+            db.getParkingList(Last_Lat, Last_Lon, radiusInMeters);
 
         } else {
             Toast.makeText(MainActivity.this, R.string.unableLocation, Toast.LENGTH_SHORT).show();
@@ -574,7 +594,7 @@ public class MainActivity extends AppCompatActivity
             db.saveParkingSpot(parkingSpot);
             Toast.makeText(MainActivity.this, R.string.spottedText, Toast.LENGTH_SHORT).show();
             updateSpotsThanks(sharedpreferences.getInt(userTags, 0), sharedpreferences.getInt(userThanks, 0), true);
-            db.getParkingList(Last_Lat, Last_Lon, 1000);
+            db.getParkingList(Last_Lat, Last_Lon, radiusInMeters);
         } else {
             Toast.makeText(MainActivity.this, R.string.unableLocation, Toast.LENGTH_SHORT).show();
         }
@@ -614,7 +634,7 @@ public class MainActivity extends AppCompatActivity
             Toast.makeText(MainActivity.this, R.string.freeAdded, Toast.LENGTH_SHORT).show();
             mMap.clear();
             updateSpotsThanks(sharedpreferences.getInt(userTags, 0), sharedpreferences.getInt(userThanks, 0), true);
-            db.getParkingList(Last_Lat, Last_Lon, 1000);
+            db.getParkingList(Last_Lat, Last_Lon, radiusInMeters);
 
         } else {
             Toast.makeText(MainActivity.this, R.string.unableLocation, Toast.LENGTH_SHORT).show();
@@ -628,7 +648,7 @@ public class MainActivity extends AppCompatActivity
         int resMark = R.drawable.pin_free;
         for (ParkingSpot spot : spots) {
             String Json = new Gson().toJson(spot);
-            if (spot.getPartTime() != null) {
+            if (spot.getPartTime() != null && nonFree) {
                 switch (spot.getPartTime()) {
                     case "1":
                         resMark = R.drawable.pin_free_1h;
@@ -637,15 +657,15 @@ public class MainActivity extends AppCompatActivity
                         resMark = R.drawable.pin_free_2h;
                         break;
                 }
-            } else if (spot.getStartFrom() != 0 && spot.getEndTo() != 0) {
+            } else if (spot.getStartFrom() != 0 && spot.getEndTo() != 0 && nonFree) {
                 resMark = R.drawable.pin_paid_time;
-            }else{
+            } else {
                 resMark = R.drawable.pin_free;
             }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 mMap.addMarker(new MarkerOptions().position(new LatLng(spot.getLatitude(), spot.getLongtitude())).title(spot.getStreet()).snippet(Json).icon(getBitmapDescriptor(resMark)));
-            }else {
+            } else {
                 mMap.addMarker(new MarkerOptions().position(new LatLng(spot.getLatitude(), spot.getLongtitude())).title(spot.getStreet()).snippet(Json).icon(BitmapDescriptorFactory.fromResource(resMark)));
             }
         }
@@ -657,7 +677,14 @@ public class MainActivity extends AppCompatActivity
                 return true;
             }
         });
-    if(latLng!= null) {
+        if (searchNow) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                mMap.addMarker(new MarkerOptions().position(latLng).title(places.getName().toString()).snippet("ban").icon(getBitmapDescriptor(R.drawable.search_pin)));
+            } else {
+                mMap.addMarker(new MarkerOptions().position(latLng).title(places.getName().toString()).snippet("ban").icon(BitmapDescriptorFactory.fromResource(R.drawable.search_pin)));
+            }
+        }
+        if (latLng != null) {
             CircleOptions circleOptions = new CircleOptions().center(latLng).radius(radiusInMeters).fillColor(shadeColor).strokeColor(strokeColor).strokeWidth(2);
             mMap.addCircle(circleOptions);
         }
@@ -673,6 +700,7 @@ public class MainActivity extends AppCompatActivity
             throw new IllegalArgumentException("unsupported drawable type");
         }
     }
+
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private static Bitmap getBitmap(VectorDrawable vectorDrawable) {
         Bitmap bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(),
@@ -682,6 +710,7 @@ public class MainActivity extends AppCompatActivity
         vectorDrawable.draw(canvas);
         return bitmap;
     }
+
     private BitmapDescriptor getBitmapDescriptor(int id) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             VectorDrawable vectorDrawable = (VectorDrawable) getDrawable(id);
@@ -695,7 +724,7 @@ public class MainActivity extends AppCompatActivity
 
             Canvas canvas = new Canvas(bm);
             canvas.drawBitmap(bm, 0, 0, null);
-//            vectorDrawable.draw(canvas);
+            vectorDrawable.draw(canvas);
 
             return BitmapDescriptorFactory.fromBitmap(bm);
 
@@ -741,7 +770,7 @@ public class MainActivity extends AppCompatActivity
         mMap.setMyLocationEnabled(true);
         if (Last_Lat != 0 && Last_Lon != 0)
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(Last_Lat, Last_Lon), 15));
-        db.getParkingList(Last_Lat, Last_Lon, 1000);
+        db.getParkingList(Last_Lat, Last_Lon, radiusInMeters);
     }
 
 
@@ -833,9 +862,9 @@ public class MainActivity extends AppCompatActivity
         putDouble(editer, lastLon, Last_Lon);
         editer.apply(); //jeigu neveiks buvusios pozicijos isaugojimas irasyti commit();
         //zoom to current position:
-        if (!searchActive) {
+        if (!searchNow) {
             latLng = new LatLng(Last_Lat, Last_Lon);
-            db.getParkingList(Last_Lat, Last_Lon, 1000);
+            db.getParkingList(Last_Lat, Last_Lon, radiusInMeters);
         }
         if (firstboot) {
             CameraPosition cameraPosition = new CameraPosition.Builder()
@@ -874,6 +903,17 @@ public class MainActivity extends AppCompatActivity
         }
         db.updateUserData(upU);
         edi.commit();
+    }
+
+    public void saveFavorites(List<Favorite> favs){
+        for (Favorite spot : favs) {
+            String Json = new Gson().toJson(spot);
+            Log.d("Fav", Json);
+        }
+    }
+
+    public void saveFav(View view){
+
     }
     ///========================================================================================
     //Dialog boxes
